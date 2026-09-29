@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bertahan Rp100 Ribu</title>
+<style>
+:root{--bg:#faf7f2;--card:#fff;--text:#222;--muted:#777;--acc:#e8590c;--ok:#2f9e44;--bad:#e03131;--line:#e5dfd6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17161a;--card:#221f26;--text:#eee;--muted:#a09aa8;--line:#38333f}}
+:root[data-theme="dark"]{--bg:#17161a;--card:#221f26;--text:#eee;--muted:#a09aa8;--line:#38333f}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.5}
+.w{max-width:480px;margin:0 auto;padding:18px}
+h1{font-size:22px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:14px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.lbl{font-size:12px;color:var(--muted)}
+.val{font-size:22px;font-weight:700}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--ok);transition:width .3s}
+.day{font-size:13px;color:var(--muted);margin-bottom:6px}
+.q{font-size:17px;margin:0 0 12px}
+button{display:block;width:100%;text-align:left;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:8px;font-size:15px;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--acc)}
+button:disabled{opacity:.4;cursor:not-allowed}
+button.p{background:var(--acc);color:#fff;border-color:var(--acc);text-align:center;font-weight:600}
+.d{font-size:12px;color:var(--muted)}
+.log{font-size:14px;color:var(--muted);margin-bottom:12px}
+.big{font-size:40px;text-align:center}
+.c{text-align:center}
+</style>
+</head>
+<body>
+<div class="w">
+<h1>💸 Bertahan Rp100 Ribu</h1>
+<div class="sub">30 hari. Uang terbatas. Perut tidak bisa diajak kompromi.</div>
+<div class="card stats">
+<div><div class="lbl">Uang</div><div class="val" id="m"></div></div>
+<div><div class="lbl">Kenyang</div><div class="val" id="f"></div><div class="bar"><i id="fb"></i></div></div>
+</div>
+<div id="g"></div>
+</div>
+<script>
+var S,el=document.getElementById('g');
+var rp=function(n){return 'Rp'+n.toLocaleString('id-ID')};
+var MEALS=[
+{t:'🍚 Nasi + telur',m:-7000,f:40},
+{t:'🍜 Mie instan',m:-3500,f:25},
+{t:'🍛 Warteg lengkap',m:-12000,f:60},
+{t:'🚫 Puasa hemat',m:0,f:0}
+];
+var EV=[
+{q:'Teman mengajak nongkrong di kafe.',c:[{t:'Ikut, pesan kopi',m:-15000,f:5,r:'Seru, tapi dompet menjerit.'},{t:'Tolak halus',m:0,f:0,r:'Aman. Kamu istirahat di rumah.'}]},
+{q:'Kamu menemukan uang di saku jaket lama!',c:[{t:'Simpan semua',m:8000,f:0,r:'Rezeki nomplok.'}]},
+{q:'Ban motor bocor di jalan.',c:[{t:'Tambal di bengkel',m:-10000,f:-5,r:'Selesai, tapi lumayan mahal.'},{t:'Dorong sampai rumah',m:0,f:-25,r:'Hemat uang, habis tenaga.'}]},
+{q:'Tetangga menawarkan kerja bantu angkat barang.',c:[{t:'Ambil kerjaan',m:15000,f:-20,r:'Capek, tapi dapat upah.'},{t:'Lewatkan',m:0,f:0,r:'Kamu santai saja hari ini.'}]},
+{q:'Ada diskon besar: 2 bungkus mie instan gratis 1.',c:[{t:'Beli stok',m:-7000,f:15,r:'Stok aman untuk hari susah.'},{t:'Abaikan',m:0,f:0,r:'Disiplin dompet.'}]},
+{q:'Kuota internet habis.',c:[{t:'Isi paket kecil',m:-10000,f:0,r:'Bisa online lagi.'},{t:'Pakai wifi tetangga',m:0,f:-5,r:'Sinyal lemot, sabar.'}]},
+{q:'Ibu mengirim makanan dari kampung!',c:[{t:'Makan sepuasnya',m:0,f:50,r:'Perut bahagia.'}]},
+{q:'Tergoda jajan gorengan di pinggir jalan.',c:[{t:'Beli 3 biji',m:-3000,f:20,r:'Murah dan mengenyangkan.'},{t:'Tahan diri',m:0,f:0,r:'Kuat imanmu.'}]},
+{q:'Ada lomba kecil di grup, hadiah uang tunai.',c:[{t:'Ikut (pakai kuota)',m:-2000,f:0,r:'Tidak menang. Yah.'},{t:'Ikut & beruntung',m:20000,f:0,r:'MENANG! Tapi ini hanya untuk yang beruntung.',lucky:1}]},
+{q:'Hujan deras, kamu lapar berat.',c:[{t:'Pesan ojek online',m:-18000,f:40,r:'Kenyang tapi mahal.'},{t:'Masak seadanya',m:-2000,f:20,r:'Nasi dan garam. Cukup.'}]}
+];
+function start(){S={d:1,m:100000,f:70,phase:'meal',log:''};day()}
+function hud(){
+document.getElementById('m').textContent=rp(S.m);
+document.getElementById('m').style.color=S.m<15000?'var(--bad)':'inherit';
+document.getElementById('f').textContent=S.f+'%';
+var b=document.getElementById('fb');b.style.width=S.f+'%';b.style.background=S.f<30?'var(--bad)':'var(--ok)';
+}
+function end(win,msg){
+hud();
+el.innerHTML='<div class="card c"><div class="big">'+(win?'🏆':'💀')+'</div><h2>'+(win?'Kamu bertahan 30 hari!':'Game over di hari '+S.d)+'</h2><p>'+msg+'</p>'+(win?'<p><b>Sisa uang: '+rp(S.m)+'</b><br>'+(S.m>=30000?'Rank: Master Hemat 🥇':S.m>=10000?'Rank: Anak Kos Tangguh 🥈':'Rank: Selamat, nyaris saja 🥉')+'</p>':'')+'<button class="p" onclick="start()">Main lagi</button></div>';
+}
+function day(){
+hud();
+S.phase='meal';
+var h='<div class="card"><div class="day">Hari '+S.d+' / 30</div>'+(S.log?'<div class="log">'+S.log+'</div>':'')+'<p class="q">Mau makan apa hari ini?</p>';
+MEALS.forEach(function(x,i){
+var dis=S.m+x.m<0;
+h+='<button '+(dis?'disabled':'')+' onclick="meal('+i+')">'+x.t+' <span class="d">('+(x.m?rp(-x.m):'gratis')+', +'+x.f+' kenyang)</span></button>';
+});
+el.innerHTML=h+'</div>';
+}
+function meal(i){
+var x=MEALS[i];S.m+=x.m;S.f=Math.min(100,S.f+x.f);
+S.ev=EV[Math.floor(Math.random()*EV.length)];
+hud();
+var h='<div class="card"><div class="day">Hari '+S.d+' / 30 · Kejadian</div><p class="q">'+S.ev.q+'</p>';
+S.ev.c.forEach(function(c,j){
+var dis=S.m+c.m<0||(c.lucky&&false);
+h+='<button '+(dis?'disabled':'')+' onclick="ev('+j+')">'+c.t+' <span class="d">('+(c.m>0?'+'+rp(c.m):c.m<0?'-'+rp(-c.m):'Rp0')+')</span></button>';
+});
+el.innerHTML=h+'</div>';
+}
+function ev(j){
+var c=S.ev.c[j];
+if(c.lucky&&Math.random()<0.6){c={m:-2000,f:0,r:'Tidak menang kali ini. Kuota terbuang.'}}
+S.m+=c.m;S.f=Math.max(0,Math.min(100,S.f+c.f));
+S.log=c.r;
+if(S.f<=0){return end(false,'Kamu pingsan kelaparan monyet bodo. '+c.r)}
+S.d++;
+if(S.d>30){return end(true,'Kamu berhasil mengatur Rp100 ribu selama sebulan. kamu miskin dan josjis.')}
+S.f-=22;
+if(S.f<=0){return end(false,'Perutmu kosong dan kamu tumbang. Makan lebih rajin besok tolol!')}
+day();
+}
+start();
+</script>
+</body>
+</html>
